@@ -3,8 +3,6 @@ import java.util.Arrays;
 
 AudioContext ac;
 
-
-
 void setup(){  
   ac = new AudioContext();
   Clock clock = new Clock(ac, 500);
@@ -18,7 +16,7 @@ void setup(){
      public void messageReceived(Bead message) { //This is equivalent to 'onBeat' in our previous example
         Clock c = (Clock)message;
         if(c.isBeat()) {
-          onBeat();
+          print("'");
         }
         
         
@@ -33,9 +31,5 @@ void setup(){
 
 void draw(){
   
-}
-
-void onBeat(){    
-  print("'");
 }
 

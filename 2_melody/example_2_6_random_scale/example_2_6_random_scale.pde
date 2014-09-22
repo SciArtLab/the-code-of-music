@@ -6,13 +6,19 @@ boolean isBeat;
 float freq;
 float scale[];
 
+WavePlayer wp;
+Gain g;
+
 void setup(){  
   ac = new AudioContext();
   Clock clock = new Clock(ac, 500);
   scale = new float[5];
-  for(int i = 0; i < 5; i++){
-    scale[i] = random(130, 246);
+  for(int i = 0; i < 5; i++){    
+    scale[i] = random(130, 3000);
+    
+    
   }
+  wp = new WavePlayer(ac, freq, Buffer.SINE);
   
   clock.addMessageListener(
   //this is the on-the-fly bead
@@ -48,12 +54,14 @@ void draw(){
 void onBeat(){    
   int pos = (int)random(0, 5);
   float freq = scale[pos];
-  WavePlayer wp = new WavePlayer(ac, freq, Buffer.SINE);
-  Gain g = new Gain(ac, 1, new Envelope(ac, 0));
+  //  WavePlayer wp = new WavePlayer(ac, freq, Buffer.SINE);
+  wp.setFrequency(freq);
+  g = new Gain(ac, 1, new Envelope(ac, 0));
   g.addInput(wp);
   ac.out.addInput(g);
-  ((Envelope)g.getGainEnvelope()).addSegment(0.1, random(200));
-  ((Envelope)g.getGainEnvelope()).addSegment(0, random(400));
+  ((Envelope)g.getGainEnvelope()).addSegment(0.1, 200);
+  ((Envelope)g.getGainEnvelope()).addSegment(0, 600);
+  
   isBeat = true;
   
   

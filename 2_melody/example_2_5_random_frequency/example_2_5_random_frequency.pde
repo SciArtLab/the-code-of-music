@@ -3,9 +3,10 @@ import java.util.Arrays;
 
 AudioContext ac;
 
-
-
 void setup(){  
+//The AudioContext is the 'parent bead'. Its constructor creates a connection to the computer’s audio
+//hardware, allocates memory for audio processing, and manages the audio
+//processing threads.
   ac = new AudioContext();
   Clock clock = new Clock(ac, 500);
   
