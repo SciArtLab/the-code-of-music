@@ -5,8 +5,7 @@ Sequencer seq;
 SequencerInterface face; 
 SequencerInterface rectangular, circular;
 
-void setup(){  
-  //we need to initialize it:
+void setup(){ 
   seq = new Sequencer();  
   circular = new CircularInterface();
   rectangular = new RectangularInterface();
