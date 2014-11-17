@@ -9,8 +9,8 @@ int BPM;
 void setup() {
   MidiBus.list(); 
   midiBus = new MidiBus(this, 0, 1);
-  BPM = 120;
-  p = new Player(180);
+  BPM = 400;
+  p = new Player(BPM);
 }
 
 void draw() {
@@ -26,18 +26,18 @@ void onTick(long millis) {
      int channel = 0;
      int midiNote;
      int velocity = 100;
-     int duration = 800;  
+     int duration = 800;
      
-     if(p.transport.totalBeats % 4 == 0){
+     if(p.transport.totalBeats % 7 == 0){
        midiNote = 36;
        velocity = 50;
        p.play(channel, midiNote, velocity, duration, millis);
      }
-     if(p.transport.totalBeats % 3 == 0){
+     if(p.transport.totalBeats % 5 == 0){
        midiNote = 37;
        p.play(channel, midiNote, velocity, duration, millis);
      }
-     if(p.transport.totalBeats % 5 == 0){
+     if(p.transport.totalBeats % 8 == 0){
        midiNote = 42;
        p.play(channel, midiNote, velocity, duration, millis);
      }

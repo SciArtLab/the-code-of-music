@@ -40,7 +40,7 @@ void draw() {
   
   int octaveSpan = 6; 
   int maxPos = octaveSpan * 12; //let's assume a chromatic scale.
-  int nextPos = currentNote + (int)intervals.get("major second")*direction;
+  int nextPos = currentNote + (int)intervals.get("augmented fourth")*direction;
   
   if(nextPos > 0 && nextPos < maxPos){
     currentNote = nextPos;

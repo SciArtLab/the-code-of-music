@@ -75,7 +75,7 @@ void onTick(long millis) {
       //NOTE 2: PARALLEL DRONE
       channel = 0;
       int parallelDrone = note - (int)intervals.get("perfect fourth");
-      p.play(channel, note, velocity, duration, millis);
+      p.play(channel, parallelDrone, velocity, duration, millis);
     
   }
 }

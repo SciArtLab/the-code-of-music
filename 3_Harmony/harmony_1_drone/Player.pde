@@ -28,11 +28,11 @@ class Player implements TransportListener{
   }
   
   void play(int channel, int pitch, int velocity, int duration, long now){
-    Note noteOn = new Note(0, pitch, velocity, duration);
+    Note noteOn = new Note(channel, pitch, velocity, duration);
     noteOn.timestamp = now;
     schedule.add(noteOn);
     
-    Note noteOff = new Note(0, pitch, 0);
+    Note noteOff = new Note(channel, pitch, 0);
     //durations are in ticks; 24 by default
     noteOff.timestamp = now + floor(duration * transport.beatLength/24);
     schedule.add(noteOff);

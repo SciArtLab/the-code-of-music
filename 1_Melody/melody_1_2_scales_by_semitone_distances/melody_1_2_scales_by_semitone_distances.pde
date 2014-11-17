@@ -2,9 +2,10 @@ import themidibus.*;
 
 MidiBus midiBus; 
 
-int root = 60; //middle C
-//int root = 62 // D
-int[] scale = {0, 2, 4, 5, 7, 9, 11};// MAJOR
+//int root = 60; //middle C
+int root = 70; // D
+int[] scale = {0, 1, 1, 4, 5, 8, 10};
+
 
 // CHROMATIC_SCALE = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11},
 // MAJOR_SCALE = {0, 2, 4, 5, 7, 9, 11},
@@ -34,7 +35,7 @@ void draw() {
   int octave = pos / scale.length; 
   //now to get a note in the scale, we add the root to its respective interval. 
   int note = root + scale[posInScale] + 12*octave;
-  pos = (pos + 1) % (scale.length*4 + 1); //let's span 4 octaves, then go back to 0
+  pos = (pos + 1) % (scale.length*1 + 1); //let's span 4 octaves, then go back to 0
   //the + 1 is there so that we play the root at the top.
   
   int channel; 

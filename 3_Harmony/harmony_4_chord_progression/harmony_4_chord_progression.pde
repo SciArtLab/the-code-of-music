@@ -17,7 +17,7 @@ final int[]
 
 
 int[] chordRoots = {60, 64, 65, 67};//C, E, F, G  
-int[][] chords = {MAJOR_TRIAD, MINOR_TRIAD, MAJOR_TRIAD, MAJOR_TRIAD};
+int[][] chords = {MINOR_TRIAD, MINOR_TRIAD, MINOR_TRIAD, MINOR_TRIAD};
   
   //  Major
   //  maj 6th 0 4 7 9

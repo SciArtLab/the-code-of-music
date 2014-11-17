@@ -58,17 +58,27 @@ void setup() {
   {
     int channel = 1;
     int pitch = 0;
-    if(outstring.charAt(i)=='A') pitch = 69;
-    if(outstring.charAt(i)=='B') pitch = 71;
-    int velocity = 127;
+    int velocity = 20;
+    int duration = 100;
+    if(outstring.charAt(i)=='A') {
+      pitch = 69;
+      velocity = 50;
+      duration = 300;
+    }
+    if(outstring.charAt(i)=='B'){
+       pitch = 71;
+       velocity = 120;
+       duration = 800;
+    }
     myBus.sendNoteOn(channel, pitch, velocity); // Send a Midi noteOn
-    delay(200);
+    delay(duration);
     myBus.sendNoteOff(channel, pitch, velocity); // Send a Midi nodeOff
   
   }
 
 
 }
+
 
 
 void delay(int time) {

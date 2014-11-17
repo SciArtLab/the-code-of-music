@@ -3,7 +3,7 @@ MidiBus myBus;
 
 
 int[] pitches_sequence;
-int beatDuration = 100;
+int beatDuration = 60;
 int[] durations_sequence;
 int[] velocities_sequence;
 
@@ -14,12 +14,12 @@ void setup(){
   myBus = new MidiBus(this, -1, 1); 
   
 //  MidiLoader loader = new MidiLoader("jesu.mid");
-  MidiLoader loader = new MidiLoader("totaleclipse.mid");
+  MidiLoader loader = new MidiLoader("taylor_swift-shake_it_off.mid");
   
   
   //get the data in the second track of the midi file
-  int track = 2;
-  ArrayList<Note> notes = loader.getNotes(2);
+  int track = 3;
+  ArrayList<Note> notes = loader.getNotes(track);
   println("notes in track: " + track + " : " + notes.size());
   
   pitches_sequence = new int[notes.size()];

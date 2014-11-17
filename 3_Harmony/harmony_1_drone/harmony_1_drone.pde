@@ -42,7 +42,7 @@ void onTick(long millis) {
     //NOTE 1: DRONE
     if(p.transport.beat() == 0 || p.transport.beat() == 2){
       int drone = root;
-      int channel = 0; 
+      int channel = 1; 
       int velocity = 100;
       int duration = 1000;
       p.play(channel, drone, velocity, duration, millis);
@@ -73,7 +73,7 @@ void onTick(long millis) {
     //now to get a note in the scale, we add the root to its respective interval. 
     int note = root + currentNote + 12*octave;
     
-    int channel = 1; 
+    int channel = 2; 
     int velocity = floor(random(40, 100));
     int duration = floor(random(200, 400));
     p.play(channel, note, velocity, duration, millis);

@@ -30,11 +30,11 @@ void onTick(long millis) {
     int duration = 24;
     
     //accent the first and third beat of every measure.
-    int velocity = 40;
-    if(beat == 1){
-      velocity = 110;
+    int velocity = 20;
+    if(beat == 0){
+      velocity = 127;
     }
-    if(beat == 3){
+    if(beat == 2){
       velocity = 60;
     }
     p.play(channel, midiNote, velocity, duration, millis);
