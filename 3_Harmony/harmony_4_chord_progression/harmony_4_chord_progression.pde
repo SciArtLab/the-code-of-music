@@ -2,7 +2,8 @@ import themidibus.*;
 MidiBus midiBus;
 
 
-Player p;
+Score s;
+Transport t;
 int syncopationAmount;
 int BPM;
 
@@ -17,7 +18,7 @@ final int[]
 
 
 int[] chordRoots = {60, 64, 65, 67};//C, E, F, G  
-int[][] chords = {MINOR_TRIAD, MINOR_TRIAD, MINOR_TRIAD, MINOR_TRIAD};
+int[][] chords = {MAJOR_TRIAD, MINOR_TRIAD, MAJOR_TRIAD, MAJOR_TRIAD};
   
   //  Major
   //  maj 6th 0 4 7 9
@@ -41,8 +42,9 @@ void setup() {
   MidiBus.list(); 
   midiBus = new MidiBus(this, 0, 1);
   BPM = 120;
-  p = new Player(100);
-  p.transport.beatsPerMeasure = 4;
+  s = new Score();
+  t = new Transport(BPM);
+  t.setListener(s);
   root = 60;
 
   
@@ -52,9 +54,9 @@ void draw() {
   
 }
 
-void onTick(long millis) {  
-  if (p.transport.isNewBeat) {
-    int beat = p.transport.beat();
+void onTick(long now) {  
+  if (t.newBeat()) {
+    int beat = t.beat();
     
     int root = chordRoots[beat];
     int[] chord = chords[beat];
@@ -62,20 +64,22 @@ void onTick(long millis) {
     int pitch;
     int channel = 0; 
     int velocity = 80;
-    int duration = 24;
+    int duration = t.toTicks(1/4);
     for(int i = 0; i < chord.length; i++){
       pitch = root + chord[i];
-      p.play(channel, pitch, velocity, duration, millis);
+      s.add(channel, pitch, velocity, duration, now);
     }
     
   }
 }
 
+//remember to quit using X button on app window
 void exit(){
-  p.stopAll();
+  println("exiting");
+  t.stop();
+  s.allNotesOff();
   super.exit();
 }
-
 
 
 

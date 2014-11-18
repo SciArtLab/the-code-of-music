@@ -1,10 +1,11 @@
 import themidibus.*;
 MidiBus midiBus;
-//TIME SIGNATURE
-//Our Transport will now keep track the current measure, the current beat, and the current subdivision.
-//We'll control our time signature by setting the number of beats in a measure.
 
-Player p;
+//Press keys 2 through 6 to change the number of beats per measure. Hear how the accent shifts 
+//(we're accenting the first beat in each measure)
+
+Score s;
+Transport t;
 
 int BPM;
 
@@ -12,7 +13,9 @@ void setup() {
   MidiBus.list(); 
   midiBus = new MidiBus(this, 0, 1);
   int BPM = 120;
-  p = new Player(180);
+  s = new Score();
+  t = new Transport(BPM);
+  t.setListener(s);
 }
 
 void draw() {
@@ -20,36 +23,38 @@ void draw() {
 }
 
 void onTick(long millis) {
-  println(p.transport.measure() + " : " +  p.transport.beat());
-  if (p.transport.isNewBeat) {
+  if(t.newBeat()){
     int channel = 0;
-    int[] notes = {60, 62, 65, 67};
-    int beat = p.transport.beat();
+    int[] notes = {60, 62, 65, 67, 69, 71};
+    int beat = t.beat();
     int midiNote = notes[beat];//one note per beat
     
-    int duration = 24;
+    int duration = t.toTicks(1/4);
     
     //accent the first and third beat of every measure.
-    int velocity = 20;
+    int velocity = 40;
     if(beat == 0){
-      velocity = 127;
+      velocity = 100;
     }
     if(beat == 2){
-      velocity = 60;
+      velocity = 80;
     }
-    p.play(channel, midiNote, velocity, duration, millis);
+    
+    s.add(channel, midiNote, velocity, duration, millis);
+    println(beat);
     
   }
 }
 
-void mouseMoved(){
-  int tempo = floor(map(mouseX, 0, height, 20, 500));
-  p.transport.setTempo(tempo);
-  println("tempo: " + tempo + " BPM");
-}
+  
 
+
+
+//remember to quit using X button on app window
 void exit(){
-  p.stopAll();
+  println("exiting");
+  t.stop();
+  s.allNotesOff();
   super.exit();
 }
 

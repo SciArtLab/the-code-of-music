@@ -1,38 +1,41 @@
 import themidibus.*;
+
 MidiBus midiBus;
 
-//A more general approach is to have a Player class (which could evolve to a more general Score for any kind of event), 
-//that schedules a noteOff message whenever a noteOn is sent.
-//Since our Clock has more functionality now, handling BPM and beats and measures, let's call it 'Transport'.
-
-
-Player p;
+Score s;
+Transport t;
 
 void setup() {
   MidiBus.list(); 
   midiBus = new MidiBus(this, 0, 1);
-  p = new Player();
+  
+  s = new Score();
+  t = new Transport(240);
+  t.setListener(s); 
 }
 
 void draw() {
   
 }
 
-void onTick(long millis) {
-  if (p.transport.isNewBeat) {
+void onTick(long now) {
+  if (t.newBeat()) {
     int channel = 0;
     int midiNote = floor(random(0, 127));
     int q = 24; //a quarter note has 24 ticks 
-    int duration = floor(random(q/16f, q*8));
+    int duration = t.toTicks(random(1/8, 1/2));
     int velocity = floor(random(0, 127));  
     
-    p.play(channel, midiNote, velocity, duration, millis);
+    s.add(channel, midiNote, velocity, duration, now);
     
   }
 }
 
+//to avoid lingering notes, quit your sketch by hiting the X button in the window.
 void exit(){
-  p.stopAll();
+  println("exiting");
+  t.stop();
+  s.allNotesOff();
   super.exit();
 }
 

@@ -2,7 +2,9 @@ import themidibus.*;
 MidiBus midiBus;
 
 
-Player p;
+Score s;
+Transport t;
+
 int syncopationAmount;
 int BPM;
 
@@ -13,8 +15,9 @@ void setup() {
   MidiBus.list(); 
   midiBus = new MidiBus(this, 0, 1);
   BPM = 120;
-  p = new Player(180);
-  p.transport.beatsPerMeasure = 4;
+  s = new Score();
+  t = new Transport(BPM);
+  t.setListener(s);
   root = 60;
   
   intervals = new FloatDict();
@@ -37,15 +40,15 @@ void draw() {
   
 }
 
-void onTick(long millis) {  
-  if (p.transport.isNewBeat) {
+void onTick(long now) {  
+  if (t.newBeat()) {
     //NOTE 1: DRONE
-    if(p.transport.beat() == 0 || p.transport.beat() == 2){
+    if(t.beat() == 0 || t.beat() == 2){
       int drone = root;
       int channel = 1; 
       int velocity = 100;
-      int duration = 1000;
-      p.play(channel, drone, velocity, duration, millis);
+      int duration = t.toTicks(1/2);
+      s.add(channel, drone, velocity, duration, now);
     }
     //NOTE 2: MELODY
     int octaveSpan = 2; 
@@ -76,19 +79,17 @@ void onTick(long millis) {
     int channel = 2; 
     int velocity = floor(random(40, 100));
     int duration = floor(random(200, 400));
-    p.play(channel, note, velocity, duration, millis);
+    s.add(channel, note, velocity, duration, now);
     
   }
 }
 
-void mouseMoved(){
-  syncopationAmount = floor(map(mouseX, 0, width, 0, p.transport.beatLength/2));
-  println("syncopation amount: " + syncopationAmount);
- 
-}
 
+//remember to quit using X button on app window
 void exit(){
-  p.stopAll();
+  println("exiting");
+  t.stop();
+  s.allNotesOff();
   super.exit();
 }
 

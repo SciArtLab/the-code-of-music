@@ -7,7 +7,8 @@ MidiBus midiBus;
 
 //Try changing the tempo by moving the mouse over the sketch window.
 
-Player p;
+Score s;
+Transport t;
 
 int BPM;
 //in case you're curious:
@@ -30,34 +31,40 @@ final int
 void setup() {
   MidiBus.list(); 
   midiBus = new MidiBus(this, 0, 1);
-  int BPM = 120;
-  p = new Player(BPM);
+  int BPM = 240;
+  s = new Score();
+  t = new Transport(BPM);
+  t.setListener(s);
 }
 
 void draw() {
   
 }
 
-void onTick(long millis) {
-  if (p.transport.isNewBeat) {
+void onTick(long now) {
+  if(t.newBeat()) {
     int midiNote = floor(random(0, 127));
-    int duration = 200;  
+    int duration = t.toTicks(0.5);  //a half note
     int velocity = 120;  
     int channel = 0;
     
-    p.play(channel, midiNote, velocity, duration, millis);
+    s.add(channel, midiNote, velocity, duration, now);
     
   }
 }
 
 void mouseMoved(){
   int tempo = floor(map(mouseX, 0, height, 20, 500));
-  p.transport.setTempo(tempo);
+  t.setTempo(tempo);
   println("tempo: " + tempo + " BPM");
 }
 
+//to avoid lingering notes, quit your sketch by hiting the X button in the window.
+//(otherwise Processing doesn't seem to call the 'exit' function)
 void exit(){
-  p.stopAll();
+  println("exiting");
+  t.stop();
+  s.allNotesOff();
   super.exit();
 }
 

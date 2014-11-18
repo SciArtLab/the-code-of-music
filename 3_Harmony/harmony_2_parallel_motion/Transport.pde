@@ -1,90 +1,143 @@
 //Towards a Transport class
 class Transport implements Runnable {
-  final Thread timingThread  = new Thread(this);
-  TransportListener listener; 
+  private final Thread timingThread  = new Thread(this);
+  private TransportListener listener; 
   
-  //user settings
-  float beatLength;
-  int beatsPerMeasure;  
-  int syncopation;
+  //settings
+  private int bpm;
+  private int beatsPerMeasure;  
+  private int ticksPerBeat;
+  private int syncopation;
   
-  //public state (if this was Java these would be private)
-  boolean isNewBeat; 
-  float posInMeasure;
+  //pre-calculated vars
+  private long beatLength;//in millis, based on BPM
+  private long tickLength;//in millis, based on BPM and ticksPerBeat
   
-  //internal state 
-  long startMillis;
-  long elapsedMillis;
-  int ticks;
-  int totalBeats;
-  long lastBeat;
-  long lastMeasure;
+  //state
+  private long start;//in millis
+  private long now;//in millis
+  private int beats;
+  private int ticks;  
   
-  Transport(int bpm, TransportListener _listener){
-    listener = _listener;
-    setTempo(bpm);
+  //for users
+  private boolean isNewBeat; 
+  private long lastBeat;  
+  private long lastMeasure;//to calculate posInMeasure, to draw playhead
+  
+  
+  public Transport(int _bpm){
+    bpm = _bpm;
     beatsPerMeasure = 4;
+    ticksPerBeat = 480;//this is MAX/MSP's default value
     syncopation = 0;
+    
+    setTempo(bpm);
     isNewBeat = true;
     start();
   }
   
-  void setTempo(int bpm){
-     beatLength = 1.0 / bpm *60*1000.0;
+  public void setSyncopation(int amount){
+    syncopation = amount;
+    updateBeatLength();
   }
   
-  void start(){
+  public void setTempo(int _bpm){
+     bpm = _bpm;
+     updateBeatLength();
+  }
+  
+  private void updateBeatLength(){
+    beatLength = (long)(1.0 / bpm *60*1000.0) + syncopation;
+    tickLength = (long)(beatLength / (float)ticksPerBeat);
+  }
+  
+  public void setListener(TransportListener _listener){
+    listener = _listener;
+  }
+  
+  public void start(){
     timingThread.start();
     lastBeat = System.currentTimeMillis();
   }
   
-  void stop(){
+  public void stop(){
     timingThread.interrupt();
   }
   
-  int beat(){
-    return totalBeats % beatsPerMeasure;
+  public int measure(){
+    return beats / beatsPerMeasure;
   }
   
-  int measure(){
-    return totalBeats / beatsPerMeasure;
+  public int beat(){
+    return beats % beatsPerMeasure;
+  }
+  
+  
+  public int unit(){
+    //16 units per beat (like Ableton Live, for example). It's an arbitrary number.
+    float ticksPerUnit = ticksPerBeat / 16;
+    return (int)(ticks % ticksPerBeat/ticksPerUnit);
+  }
+  
+  public float posInMeasure(){
+    float measureDuration = (beatLength)*beatsPerMeasure;
+    return (now - lastMeasure)/measureDuration;
+  }
+  
+  public boolean newBeat(){
+    return isNewBeat;
   }
   
   @Override
   void run() {
-    startMillis = System.currentTimeMillis();
-    int waitInNanos = 500000;//0.5ms
-      while (true) {
-        try {          
-          ticks++;
-          long now = System.currentTimeMillis();
-          elapsedMillis = now - startMillis;
-
-          if(now - lastBeat > beatLength + syncopation){
-            lastBeat = now;
-            isNewBeat = true;
-            if(beat() == 0){
-              lastMeasure = now;
-            }
-            totalBeats++;
+    start = System.currentTimeMillis(); 
+    int waitMillis = (int)(tickLength / 1000000);
+    int waitNanos = (int) tickLength % 1000000;
+    while (true) {
+      try {    
+        ticks++;
+        now = System.currentTimeMillis();
+        if(now - lastBeat > beatLength){
+          beats++;
+          lastBeat = now;
+          isNewBeat = true;
+          if(beat() == 0){
+            lastMeasure = now;
           }
-          else{
-            isNewBeat = false;
-          }
-          listener.tick(elapsedMillis);
-          float measureDuration = (beatLength)*beatsPerMeasure;
-          posInMeasure = (now - lastMeasure)/measureDuration;
-          
-          Thread.sleep(0, waitInNanos);
-        } 
-        catch (InterruptedException e) {
-          break;
-        } 
-        catch (Exception e) {
-          e.printStackTrace();
         }
+        else{
+          isNewBeat = false;
+        }
+        if(listener != null){
+          listener.tick(now);
+        }
+        Thread.sleep(waitMillis, waitNanos);
+      } 
+      catch (InterruptedException e) {
+        break;
+      } 
+      catch (Exception e) {
+        e.printStackTrace();
       }
     }
-    
   }
+  
+  long ticksToMillis(int ticks){
+    //1 tick = 1 beat/24 (this comes from the MIDI specification)
+    return (long)(ticks * t.beatLength/ticksPerBeat);
+  }
+  
+  //note duration between 0 and 1:
+  // 1 is a whole measure
+  // 1/2 or 0.5 is a half note, 
+  // 1/4 or 0.25 is a quarter note, etc.
+  int toTicks(float durationFraction){
+    return floor(durationFraction * ticksPerBeat*beatsPerMeasure);
+  }
+  
+  
+    
+    
+    
+}
   

@@ -1,34 +1,23 @@
 import themidibus.*;
 MidiBus midiBus;
 //TIME SIGNATURE
-//Our Transport will now keep track the current measure, the current beat, and the current subdivision.
-//We'll control our time signature by setting the number of beats in a measure.
+//Our Transport will now keep track the current measure, the current beat, and the current subdivision:
+//Look at the console printouts ––the format is measure:beat:unit. There are 16 units in a beat (like in Ableton Live, for example)
+//We'll control our time signature by setting the number of beats in a measure. 
 
-Player p;
+//Press keys 2 through 6 to change the number of beats per measure
 
-int BPM;
-//in case you're curious:
-final int 
-  GRAVE = 40,
-  LARGO = 45,
-  LARGHETTO = 50,
-  LENTO = 55,
-  ADAGIO = 60,
-  ADAGIETTO = 65,
-  ANDANTE = 70,
-  ANDANTINO = 80,
-  MODERATO = 95,
-  ALLEGRETTO = 110,
-  ALLEGRO = 120,
-  VIVACE = 145,
-  PRESTO = 180,
-  PRETISSIMO = 220;
+Score s;
+Transport t;
 
 void setup() {
   MidiBus.list(); 
   midiBus = new MidiBus(this, 0, 1);
   int BPM = 120;
-  p = new Player(PRESTO);
+  s = new Score();
+  t = new Transport(BPM);
+  t.beatsPerMeasure = 5;
+  t.setListener(s);
 }
 
 void draw() {
@@ -36,38 +25,54 @@ void draw() {
 }
 
 void onTick(long millis) {
-  println(p.transport.measure() + " : " +  p.transport.beat());
-  if (p.transport.isNewBeat) {
+  println(t.measure() + " : " +  t.beat() + " : " + t.unit());
+  if(t.newBeat()) {
     int channel = 0;
-    int[] notes = {60, 62, 65, 67};
-    int beat = p.transport.beat();
+    int[] notes = {60, 62, 65, 67, 69, 71};
+    int beat = t.beat();
     int midiNote = notes[beat];//one note per beat
-    int velocity = 100;
-    //make the second and third notes longer
-    int duration = 12;
+    int duration = t.toTicks(1/4);
+    //accent the first beat of every measure.
+    int velocity = 40;
+    if(beat == 0){
+      velocity = 100;
+    }
     
-    if(beat == 1){
-      duration = 48;
-    }
-    if(beat == 3){
-      duration = 96;
-    }
-    p.play(channel, midiNote, velocity, duration, millis);
+    s.add(channel, midiNote, velocity, duration, millis);
     
   }
 }
 
-void mouseMoved(){
-  int tempo = floor(map(mouseX, 0, height, 20, 500));
-  p.transport.setTempo(tempo);
-  println("tempo: " + tempo + " BPM");
+void keyPressed(){
+  switch(key){
+    case '2':
+      t.beatsPerMeasure = 2;
+      break;
+    case '3':
+      t.beatsPerMeasure = 3;
+      break;
+    case '4':
+      t.beatsPerMeasure = 4;
+      break;
+    case '5':
+      t.beatsPerMeasure = 5;
+      break;
+    case '6':
+      t.beatsPerMeasure = 6;
+      break;
+  }
+  println("Beats per measure: " + t.beatsPerMeasure);
 }
 
+
+//to avoid lingering notes, quit your sketch by hiting the X button in the window.
+//(otherwise Processing doesn't seem to call the 'exit' function)
 void exit(){
-  p.stopAll();
+  println("exiting");
+  t.stop();
+  s.allNotesOff();
   super.exit();
 }
-
 
 
 

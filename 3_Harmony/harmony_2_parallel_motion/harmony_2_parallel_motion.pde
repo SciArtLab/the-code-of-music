@@ -2,7 +2,8 @@ import themidibus.*;
 MidiBus midiBus;
 
 
-Player p;
+Score s;
+Transport t;
 int syncopationAmount;
 int BPM;
 
@@ -13,8 +14,9 @@ void setup() {
   MidiBus.list(); 
   midiBus = new MidiBus(this, 0, 1);
   BPM = 120;
-  p = new Player(180);
-  p.transport.beatsPerMeasure = 4;
+  s = new Score();
+  t = new Transport(BPM);
+  t.setListener(s);
   root = 60;
   
   intervals = new FloatDict();
@@ -37,8 +39,8 @@ void draw() {
   
 }
 
-void onTick(long millis) {  
-  if (p.transport.isNewBeat) {
+void onTick(long now) {  
+  if (t.newBeat()) {
     //NOTE 1: MELODY
       int octaveSpan = 2; 
       int maxPos = octaveSpan * 12; //let's assume a chromatic scale.
@@ -69,28 +71,25 @@ void onTick(long millis) {
       
       int channel = 1; 
       int velocity = floor(random(40, 100));
-      int duration = floor(random(200, 400));
-      p.play(channel, note, velocity, duration, millis);
+      int duration = t.toTicks(floor(random(1/16, 3/4)));
+      s.add(channel, note, velocity, duration, now);
       
       //NOTE 2: PARALLEL DRONE
       channel = 0;
       int parallelDrone = note - (int)intervals.get("perfect fourth");
-      p.play(channel, parallelDrone, velocity, duration, millis);
+      s.add(channel, parallelDrone, velocity, duration, now);
     
   }
 }
 
-void mouseMoved(){
-  syncopationAmount = floor(map(mouseX, 0, width, 0, p.transport.beatLength/2));
-  println("syncopation amount: " + syncopationAmount);
- 
-}
 
+//remember to quit using X button on app window
 void exit(){
-  p.stopAll();
+  println("exiting");
+  t.stop();
+  s.allNotesOff();
   super.exit();
 }
-
 
 
 
