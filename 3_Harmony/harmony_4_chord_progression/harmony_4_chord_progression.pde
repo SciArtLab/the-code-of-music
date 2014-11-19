@@ -1,9 +1,9 @@
 import themidibus.*;
 MidiBus midiBus;
 
-
 Score s;
 Transport t;
+
 int syncopationAmount;
 int BPM;
 
@@ -69,7 +69,6 @@ void onTick(long now) {
       pitch = root + chord[i];
       s.add(channel, pitch, velocity, duration, now);
     }
-    
   }
 }
 

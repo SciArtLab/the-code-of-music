@@ -31,6 +31,7 @@ class Transport implements Runnable {
     ticksPerBeat = 480;//this is MAX/MSP's default value
     syncopation = 0;
     
+    
     setTempo(bpm);
     isNewBeat = true;
     start();
@@ -94,9 +95,12 @@ class Transport implements Runnable {
     int waitMillis = (int)(tickLength / 1000000);
     int waitNanos = (int) tickLength % 1000000;
     while (true) {
-      try {    
-        ticks++;
+      try {  
         now = System.currentTimeMillis();
+        if(listener != null){
+          listener.tick(now);
+        }
+        ticks++;
         if(now - lastBeat > beatLength){
           beats++;
           lastBeat = now;
@@ -108,9 +112,7 @@ class Transport implements Runnable {
         else{
           isNewBeat = false;
         }
-        if(listener != null){
-          listener.tick(now);
-        }
+        
         Thread.sleep(waitMillis, waitNanos);
       } 
       catch (InterruptedException e) {

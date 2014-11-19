@@ -31,7 +31,6 @@ class Transport implements Runnable {
     ticksPerBeat = 480;//this is MAX/MSP's default value
     syncopation = 0;
     
-    
     setTempo(bpm);
     isNewBeat = true;
     start();
@@ -73,7 +72,6 @@ class Transport implements Runnable {
     return beats % beatsPerMeasure;
   }
   
-  
   public int unit(){
     //16 units per beat (like Ableton Live, for example). It's an arbitrary number.
     float ticksPerUnit = ticksPerBeat / 16;
@@ -92,6 +90,7 @@ class Transport implements Runnable {
   @Override
   void run() {
     start = System.currentTimeMillis(); 
+    lastMeasure = start;
     int waitMillis = (int)(tickLength / 1000000);
     int waitNanos = (int) tickLength % 1000000;
     while (true) {

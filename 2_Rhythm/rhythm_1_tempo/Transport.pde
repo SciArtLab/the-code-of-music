@@ -4,6 +4,7 @@ class Transport implements Runnable {
   private TransportListener listener; 
   
   //settings
+  private int bpm;
   private int beatsPerMeasure;  
   private int ticksPerBeat;
   private int syncopation;
@@ -24,22 +25,31 @@ class Transport implements Runnable {
   private long lastMeasure;//to calculate posInMeasure, to draw playhead
   
   
-  public Transport(int bpm){
+  public Transport(int _bpm){
+    bpm = _bpm;
     beatsPerMeasure = 4;
     ticksPerBeat = 480;//this is MAX/MSP's default value
     syncopation = 0;
     
-    beats = -1;
-    ticks = -1;
     
     setTempo(bpm);
     isNewBeat = true;
     start();
   }
   
-  public void setTempo(int bpm){
-     beatLength = (long)(1.0 / bpm *60*1000.0) + syncopation;
-     tickLength = (long)(beatLength / (float)ticksPerBeat);
+  public void setSyncopation(int amount){
+    syncopation = amount;
+    updateBeatLength();
+  }
+  
+  public void setTempo(int _bpm){
+     bpm = _bpm;
+     updateBeatLength();
+  }
+  
+  private void updateBeatLength(){
+    beatLength = (long)(1.0 / bpm *60*1000.0) + syncopation;
+    tickLength = (long)(beatLength / (float)ticksPerBeat);
   }
   
   public void setListener(TransportListener _listener){
@@ -85,9 +95,12 @@ class Transport implements Runnable {
     int waitMillis = (int)(tickLength / 1000000);
     int waitNanos = (int) tickLength % 1000000;
     while (true) {
-      try {    
-        ticks++;
+      try {  
         now = System.currentTimeMillis();
+        if(listener != null){
+          listener.tick(now);
+        }
+        ticks++;
         if(now - lastBeat > beatLength){
           beats++;
           lastBeat = now;
@@ -99,9 +112,7 @@ class Transport implements Runnable {
         else{
           isNewBeat = false;
         }
-        if(listener != null){
-          listener.tick(now);
-        }
+        
         Thread.sleep(waitMillis, waitNanos);
       } 
       catch (InterruptedException e) {
