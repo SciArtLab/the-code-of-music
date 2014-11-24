@@ -24,7 +24,6 @@ void setup(){
   seqRadius = 100;
   
   f = createFont("Helvetica", 10);
-  textAlign(TOP, LEFT);
   textFont(f);
   
   backgroundColor = color(0, 0, 0);
@@ -69,6 +68,8 @@ Note playRandomNote(long nowInMillis){
 void draw(){
   background(backgroundColor);
   //display BPM
+  fill(gridLines);
+  textAlign(TOP, LEFT);
   text("BPM: " + BPM, 20, 20);
   pushMatrix();
   translate(x, y);
@@ -85,14 +86,37 @@ void drawGrid(){
   
   float beatAngle = TWO_PI/(float)t.beatsPerMeasure;
   
-  //draw generated notes
-  for(int i = 0; i < currentNotes.length; i++){
+  for(int i = 0; i < t.beatsPerMeasure; i++){
+    float curBeatAngle = beatAngle * i;
+    //now let's find the cartesian coordinates for those polar positions, 
+    //to be able to draw them in Processing's coordinate system.
+    float beat_x = cos(curBeatAngle) * seqRadius;
+    float beat_y = sin(curBeatAngle) * seqRadius;
+    
+    //draw grid lines
+    stroke(gridLines);  
+    fill(gridLines);
+    line(0, 0, beat_x, beat_y);
+    
+    //add labels to the beat divisions.
+    //we're multiplying (beat_x, beat_y) by 1.2 to scale that vector (making it 20% longer)
+    //in order to offset the text.
+    textAlign(CENTER, CENTER);
+    text(t.measure() + "." + i, beat_x * 1.25, beat_y * 1.25); 
+  }
+  
+  for(int i = 0; i < t.beatsPerMeasure; i++){
+    //find out the position of the current note in polar coordinates: (angle, radius)
+    //the radius is the same for all beats: seqRadius. let's calculate the angle:    
+    float curBeatAngle = beatAngle * i;
+    //now let's find the cartesian coordinates for those polar positions, 
+    //to be able to draw them in Processing's coordinate system.
+    float beat_x = cos(curBeatAngle) * seqRadius;
+    float beat_y = sin(curBeatAngle) * seqRadius;
+      
+    //draw generated notes
     if(currentNotes[i] != null){
       Note n = currentNotes[i];
-      
-      //find out the position of the current note in polar coordinates: (angle, radius)
-      //the radius is the same for all beats: seqRadius. let's calculate the angle:    
-      float curBeatAngle = beatAngle * i;
       
       int pitchPos = (int)map(n.pitch, 0, 127, 0, seqRadius*2);
       float durationAngle = map(n.ticks, 0, t.ticksPerBeat*t.beatsPerMeasure, 0, 180);//TO DO: add a getTicksPerMeasure method to Transport
@@ -105,51 +129,27 @@ void drawGrid(){
         alpha = 255;
         S -= 10;
         B = 100;
-      }
-      
+        //uncomment this line for a circle indicator 
+       fill(gridLines);
+       float mid_step_x = cos(curBeatAngle + beatAngle / 2) * seqRadius;
+       float mid_step_y = sin(curBeatAngle + beatAngle / 2) * seqRadius;
+       ellipse(mid_step_x * 1.1, mid_step_y * 1.1, 4, 4);
+      }      
       noStroke();
       fill(340, 100, B, alpha);
       int totalAngle = (int)(curBeatAngle + durationAngle) % 360;
       arc(0, 0, pitchPos, pitchPos, curBeatAngle, curBeatAngle + radians(totalAngle));
-      println(curBeatAngle);
-      fill(backgroundColor);
-      arc(0, 0, pitchPos - 10, pitchPos - 10, curBeatAngle, curBeatAngle + radians(totalAngle));
+//      fill(backgroundColor);
+//      arc(0, 0, pitchPos - 10, pitchPos - 10, curBeatAngle, curBeatAngle + radians(totalAngle));
 
       //or, ignore durations
 //      arc(0, 0, pitchPos, pitchPos, curBeatAngle, curBeatAngle + beatAngle);
 //      println(curBeatAngle);
 //      fill(backgroundColor);
 //      arc(0, 0, pitchPos - 10, pitchPos - 10, curBeatAngle, curBeatAngle + beatAngle);
-      
-    }
+    } 
   }
-  
-  //draw grid lines
-  for(int i = 0; i < t.beatsPerMeasure; i++){
-    stroke(gridLines);  
-    //find out the position of the current beat in polar coordinates: (angle, radius)
-    //the radius is the same for all beats: seqRadius. let's calculate the angle:    
-    float curBeatAngle = beatAngle * i;
-    
-    //now let's find the cartesian coordinates for those polar positions, 
-    //to be able to draw them in Processing's coordinate system.
-    float beat_x = cos(curBeatAngle) * seqRadius;
-    float beat_y = sin(curBeatAngle) * seqRadius;
-    
-    line(0, 0, beat_x, beat_y);
-    
-    fill(gridLines);
-    //add labels to the beat divisions.
-    //we're multiplying (beat_x, beat_y) by 1.2 to scale that vector (making it 20% longer)
-    //in order to offset the text.
-    
-    text(t.measure() + "." + i, beat_x *1.2, beat_y * 1.2);
-  //    text(beatLength*i/1000 + "s", beat_x, beat_y ); 
-  //    uncomment this line for a circle indicator (instead of an arc)
-  //      ellipse(beat_x * 0.9, beat_y * 0.9, 10, 10); 
-     
-    }
-  }
+}
 
 
 void drawPlayhead(){
@@ -158,6 +158,14 @@ void drawPlayhead(){
   float playheadPos = map((float)t.posInMeasure(), 0, 1, 0, TWO_PI);
   line(0, 0, cos(playheadPos)*seqRadius, sin(playheadPos)*seqRadius);
   
+}
+
+//remember to quit using X button on app window
+void exit(){
+  println("exiting");
+  t.stop();
+  s.allNotesOff();
+  super.exit();
 }
 
 

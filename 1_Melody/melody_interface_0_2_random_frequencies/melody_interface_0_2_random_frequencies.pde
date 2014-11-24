@@ -1,17 +1,57 @@
+import controlP5.*;
 import themidibus.*;
 
 MidiBus midiBus; 
+ControlP5 cp5;
+Range frequencyRange, velocityRange;
+
+int frequencyMin = 100;
+int frequencyMax = 2000;
+
+int velocityMin = 0;
+int velocityMax = 127;
+
 
 void setup() {
+  size(700, 400);
+  colorMode(HSB, 360, 100, 100);
   MidiBus.list(); 
   midiBus = new MidiBus(this, 0, 1);
   
+  cp5 = new ControlP5(this);
+  frequencyRange = cp5.addRange("frequency_range")
+             // disable broadcasting since setRange and setRangeValues will trigger an event
+             .setBroadcast(false) 
+             .setPosition(50,50)
+             .setSize(400,40)
+             .setHandleSize(20)
+             .setRange(0,2000)
+             .setRangeValues(0,255)
+             // after the initialization we turn broadcast back on again
+             .setBroadcast(true) 
+             .setColorForeground(color(340, 100, 100))
+             .setColorBackground(color(0, 0, 30));
+  velocityRange = cp5.addRange("velocity_range")
+             // disable broadcasting since setRange and setRangeValues will trigger an event
+             .setBroadcast(false) 
+             .setPosition(50,100)
+             .setSize(400,40)
+             .setHandleSize(20)
+             .setRange(20,127)
+             .setRangeValues(0,100)
+             // after the initialization we turn broadcast back on again
+             .setBroadcast(true) 
+             .setColorForeground(color(340, 100, 100))
+             .setColorBackground(color(0, 0, 30));
+  
 }
 
-void draw() {
-  double frequency = floor(random(200, 1000));    
-  int duration = floor(random(100, 500));
-  sendNoteOn(0, frequency, 100, duration);
+void draw() {  
+  background(0);
+  double frequency = floor(random(frequencyMin, frequencyMax));    
+  int duration = 80; //note that in this example we're using delay; if you want to vary the duration, integrate it with the transport + score classes
+  int velocity = floor(random(velocityMin, velocityMax));
+  sendNoteOn(0, frequency, velocity, duration);
   
   
 }
@@ -70,8 +110,23 @@ void sendNoteOn(int channel, double frequency, int velocity, int duration) {
   // The exact range of the pitch bend is specific to the synthesizer.
   
   midiBus.sendNoteOn(channel, (int)note, velocity);
-  delay(duration);
+  delay(200);
   midiBus.sendNoteOff(channel, (int)note, velocity);
   
+  
+}
+
+void controlEvent(ControlEvent theControlEvent) {
+  if(theControlEvent.isFrom("frequency_range")) {
+    // min and max values are stored in an array.
+    // access this array with controller().arrayValue().
+    // min is at index 0, max is at index 1.
+    frequencyMin = 10 * int(theControlEvent.getController().getArrayValue(0));
+    frequencyMax = 10 * int(theControlEvent.getController().getArrayValue(1));
+  }
+  if(theControlEvent.isFrom("velocity_range")) {
+    velocityMin = int(theControlEvent.getController().getArrayValue(0));
+    velocityMax = int(theControlEvent.getController().getArrayValue(1));
+  }
   
 }

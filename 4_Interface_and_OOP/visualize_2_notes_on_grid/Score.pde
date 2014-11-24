@@ -26,15 +26,19 @@ class Score implements TransportListener{
       }
   }
   
-  public void add(int channel, int pitch, int velocity, int duration, long now){
-    Note noteOn = new Note(channel, pitch, velocity, duration);
+  Note add(int channel, int pitch, int velocity, int duration, long now){
+    Note noteOn = new Note(0, pitch, velocity, duration);
     noteOn.timestamp = now;
     schedule.add(noteOn);
     
-    Note noteOff = new Note(channel, pitch, 0);
+    Note noteOff = new Note(0, pitch, 0);
     noteOff.timestamp = now + t.ticksToMillis(duration);
     schedule.add(noteOff);
+    
+    return noteOn;
   }
+  
+  
   
   public void allNotesOff(){
     for(int i = 0; i < 127; i++){

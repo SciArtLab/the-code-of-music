@@ -18,10 +18,10 @@ class Score implements TransportListener{
   private void runEvents(long now){
       for(int i = 0; i < schedule.size() ; i++){
         Note note = schedule.get(i);
-        if(note.timestamp - now >= 0 && note.timestamp - now <= 1){ 
+        if(note.timestamp - now >= 0 && note.timestamp - now <= 1){           
           //these are both noteOn's and noteOff's: noteOff's are simply noteOn's with velocity = 0
           midiBus.sendNoteOn(note.channel, note.pitch, note.velocity);
-          schedule.remove(i);
+//          schedule.remove(i);
         }
       }
   }
